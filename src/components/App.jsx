@@ -24,7 +24,10 @@ export default class App extends Component {
   componentDidUpdate(_, prevState) {
     const { query, page } = this.state;
 
-    if (prevState.query !== query || prevState.page !== page) {
+    if (
+      (prevState.query !== query && query !== '') ||
+      prevState.page !== page
+    ) {
       this.getImages();
     } else {
     }
@@ -60,10 +63,16 @@ export default class App extends Component {
 
   handleFormSubmit = query => {
     if (query.trim() !== '' && query !== this.state.query) {
-      this.setState({ query, page: 1, images: [] });
+      this.setState({ status: 'idle', query, page: 1, images: [] });
     }
     if (query.trim() === '') {
-      this.setState({ status: 'emptyQuery' });
+      this.setState({
+        status: 'emptyQuery',
+        query: '',
+        images: [],
+        page: 1,
+        totalImages: 0,
+      });
     }
   };
 
@@ -96,7 +105,6 @@ export default class App extends Component {
       page,
     } = this.state;
     const maxPage = Math.ceil(totalImages / 12);
-    console.log(maxPage);
     return (
       <AppStyled>
         <Searchbar onSubmit={this.handleFormSubmit} />
