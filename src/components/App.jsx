@@ -6,13 +6,15 @@ import Button from './Button';
 import Modal from './Modal/Modal';
 import { AppStyled } from './App.styled';
 import { Container } from './Section/Section.styled';
-import { InfinitySpin } from 'react-loader-spinner';
+import Notification from './Notification/Notification';
+import Loader from './Loader';
 
 export default class App extends Component {
   state = {
     query: '',
     page: 1,
     images: [],
+    totalImages: [],
     status: 'idle',
     currentImage: null,
     isLoading: false,
@@ -24,17 +26,19 @@ export default class App extends Component {
 
     if (prevState.query !== query || prevState.page !== page) {
       this.getImages();
+    } else {
     }
   }
 
   getImages = () => {
     const { query, page } = this.state;
-    this.setState({ status: 'pending' });
-    fetchImages(query, page)
-      .then(({ data: { hits } }) => {
+    this.setState({ isLoading: true });
+    fetchImages(query, page, this.fetchError)
+      .then(({ data: { hits, totalHits } }) => {
         if (hits.length !== 0) {
           this.setState(prevState => ({
             images: [...prevState.images, ...hits],
+            totalImages: totalHits,
             status: 'resolved',
             error: '',
           }));
@@ -44,7 +48,7 @@ export default class App extends Component {
       })
       .catch(error => {
         this.setState({
-          error: error.message,
+          error: 'Something went wrong!',
         });
       })
       .finally(() => {
@@ -55,9 +59,10 @@ export default class App extends Component {
   };
 
   handleFormSubmit = query => {
-    if (query.trim() !== '') {
+    if (query.trim() !== '' && query !== this.state.query) {
       this.setState({ query, page: 1, images: [] });
-    } else {
+    }
+    if (query.trim() === '') {
       this.setState({ status: 'emptyQuery' });
     }
   };
@@ -76,15 +81,30 @@ export default class App extends Component {
     this.setState({ currentImage: null });
   };
 
+  fetchError = message => {
+    this.setState({ error: message });
+  };
+
   render() {
-    const { images, status, currentImage } = this.state;
+    const { images, status, currentImage, isLoading, error, totalImages } =
+      this.state;
+    const maxPage = Math.ceil(totalImages / 12);
+    console.log(maxPage);
     return (
       <AppStyled>
         <Searchbar onSubmit={this.handleFormSubmit} />
         {status === 'resolved' && (
           <>
             <ImageGallery images={images} openModal={this.openModal} />
-            <Button text="Load more" clickHandler={this.loadMore} />
+
+            {isLoading ? (
+              <Loader />
+            ) : (
+              totalImages && (
+                <Button text="Load more" clickHandler={this.loadMore} />
+              )
+            )}
+
             {currentImage && (
               <Modal image={currentImage} closeModal={this.closeModal} />
             )}
@@ -92,17 +112,19 @@ export default class App extends Component {
         )}
         {status === 'rejected' && (
           <Container>
-            <p>There is no search matches!</p>
+            <Notification
+              message={'There are no results that match your search!'}
+            />
           </Container>
         )}
         {status === 'emptyQuery' && (
           <Container>
-            <p>Write something first!</p>
+            <Notification message={'Please write something first!'} />
           </Container>
         )}
-        {status === 'pending' && (
+        {error !== '' && (
           <Container>
-            <InfinitySpin width="200" color="#3f51b5" />
+            <Notification message={error} />
           </Container>
         )}
       </AppStyled>
