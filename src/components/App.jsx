@@ -26,7 +26,7 @@ export default class App extends Component {
 
     if (
       (prevState.query !== query && query !== '') ||
-      prevState.page !== page
+      (prevState.page !== page && query !== '')
     ) {
       this.getImages();
     } else {
