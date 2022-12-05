@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { Container } from './Section.styled';
 
-const Section = ({ title, border, children }) => {
+const Section = ({ title, children }) => {
   return (
-    <Container border={border}>
+    <Container>
       {title && <h2>{title}</h2>}
       {children}
     </Container>
@@ -12,7 +12,6 @@ const Section = ({ title, border, children }) => {
 
 Section.propTypes = {
   title: PropTypes.string,
-  border: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.element),
     PropTypes.element,
