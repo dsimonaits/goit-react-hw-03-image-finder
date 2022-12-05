@@ -86,8 +86,15 @@ export default class App extends Component {
   };
 
   render() {
-    const { images, status, currentImage, isLoading, error, totalImages } =
-      this.state;
+    const {
+      images,
+      status,
+      currentImage,
+      isLoading,
+      error,
+      totalImages,
+      page,
+    } = this.state;
     const maxPage = Math.ceil(totalImages / 12);
     console.log(maxPage);
     return (
@@ -100,7 +107,7 @@ export default class App extends Component {
             {isLoading ? (
               <Loader />
             ) : (
-              totalImages && (
+              maxPage !== page && (
                 <Button text="Load more" clickHandler={this.loadMore} />
               )
             )}
